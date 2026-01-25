@@ -1,0 +1,462 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { Activity, Zap, Network, AlertCircle, CheckCircle, TrendingUp, Globe, FileText, Code, Radio } from 'lucide-react';
+
+// Cosmic color system
+const COLORS = {
+  cosmic: '#0D0F14',
+  phiGold: '#FFC857',
+  quantumTeal: '#2EC4B6',
+  warningAmber: '#FF6B6B',
+  successEmerald: '#00FF88',
+  darkGray: '#1A1C22',
+  white: '#FFFFFF',
+  muteGray: '#A0A0A0'
+};
+
+// Generate realistic time series data
+const generateTimeSeriesData = (points = 24) => {
+  return Array.from({ length: points }, (_, i) => ({
+    time: `${String(i).padStart(2, '0')}:00`,
+    latency: 12.9 + Math.random() * 2 - 1,
+    power: 65 + Math.random() * 10 - 5,
+    phi: 98.7 + Math.random() * 0.6 - 0.3,
+    nodes: 228 + Math.floor(Math.random() * 5 - 2)
+  }));
+};
+
+const AQARIONZDashboard = () => {
+  const [selectedTier, setSelectedTier] = useState(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [timeSeriesData] = useState(generateTimeSeriesData());
+  const [currentTime, setCurrentTime] = useState(0);
+
+  // Animated counter effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(prev => (prev + 1) % timeSeriesData.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [timeSeriesData.length]);
+
+  // Federation tier data
+  const tiers = [
+    { id: 1, name: 'Core', nodes: 5, status: 'GREEN', color: COLORS.successEmerald, health: 99.8 },
+    { id: 2, name: 'Research', nodes: 6, status: 'TEAL', color: COLORS.quantumTeal, health: 98.5 },
+    { id: 3, name: 'Social', nodes: 7, status: 'AMBER', color: COLORS.warningAmber, health: 97.2 },
+    { id: 4, name: 'Edge', nodes: 127, status: 'ACTIVE', color: COLORS.phiGold, health: 96.3 }
+  ];
+
+  // Hypergraph simulation data
+  const hypergraphNodes = useMemo(() => 
+    Array.from({ length: 22 }, (_, i) => ({
+      id: i,
+      tier: (i % 4) + 1,
+      latency: 10 + Math.random() * 8,
+      phi: 97 + Math.random() * 3,
+      active: Math.random() > 0.1
+    })), []
+  );
+
+  const filteredNodes = selectedTier 
+    ? hypergraphNodes.filter(n => n.tier === selectedTier)
+    : hypergraphNodes;
+
+  // KPI sparkline data
+  const latestData = timeSeriesData[currentTime];
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${COLORS.cosmic} 0%, ${COLORS.darkGray} 100%)`,
+      color: COLORS.white,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      padding: '24px',
+      overflow: 'auto'
+    }}>
+      {/* KPI Banner */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '16px',
+        marginBottom: '24px'
+      }}>
+        <KPICard 
+          icon={<Network size={24} />}
+          label="Nodes Live"
+          value={latestData.nodes}
+          trend="+2.4%"
+          color={COLORS.phiGold}
+        />
+        <KPICard 
+          icon={<Activity size={24} />}
+          label="φ³⁷⁷ Integrity"
+          value={`${latestData.phi.toFixed(1)}%`}
+          trend="stable"
+          color={COLORS.quantumTeal}
+        />
+        <KPICard 
+          icon={<Zap size={24} />}
+          label="Latency"
+          value={`${latestData.latency.toFixed(1)}ms`}
+          trend="-0.8ms"
+          color={COLORS.successEmerald}
+        />
+        <KPICard 
+          icon={<TrendingUp size={24} />}
+          label="Edge Power"
+          value={`${latestData.power.toFixed(0)}mW`}
+          trend="±3%"
+          color={COLORS.phiGold}
+        />
+        <KPICard 
+          icon={<CheckCircle size={24} />}
+          label="Paradox Resolved"
+          value="97%"
+          trend="129/133"
+          color={COLORS.successEmerald}
+        />
+        <KPICard 
+          icon={<Code size={24} />}
+          label="Polyglot Status"
+          value="PASS"
+          trend="deterministic"
+          color={COLORS.quantumTeal}
+        />
+      </div>
+
+      {/* Main Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 2fr 1fr',
+        gap: '24px',
+        marginBottom: '24px'
+      }}>
+        {/* Federation Tiers */}
+        <Panel title="FEDERATION TIERS">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {tiers.map(tier => (
+              <TierCard
+                key={tier.id}
+                tier={tier}
+                selected={selectedTier === tier.id}
+                onClick={() => setSelectedTier(selectedTier === tier.id ? null : tier.id)}
+              />
+            ))}
+          </div>
+        </Panel>
+
+        {/* Hypergraph Visualization */}
+        <Panel title="HYPERGRAPH TOPOLOGY">
+          <div style={{ position: 'relative', height: '400px' }}>
+            <HypergraphViz 
+              nodes={filteredNodes} 
+              onNodeHover={setHoveredNode}
+              hoveredNode={hoveredNode}
+            />
+            {hoveredNode !== null && (
+              <NodeTooltip node={hypergraphNodes[hoveredNode]} />
+            )}
+          </div>
+        </Panel>
+
+        {/* Drill Controls */}
+        <Panel title="DRILL CONTROLS">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <input
+              type="text"
+              placeholder="🔍 Search: latency > 12ms"
+              style={{
+                background: COLORS.darkGray,
+                border: `1px solid ${COLORS.muteGray}`,
+                color: COLORS.white,
+                padding: '12px',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+            />
+            <FilterButton active={selectedTier === null} onClick={() => setSelectedTier(null)}>
+              All Tiers
+            </FilterButton>
+            {tiers.map(tier => (
+              <FilterButton
+                key={tier.id}
+                active={selectedTier === tier.id}
+                color={tier.color}
+                onClick={() => setSelectedTier(tier.id)}
+              >
+                Tier {tier.id}: {tier.name}
+              </FilterButton>
+            ))}
+            <button style={{
+              background: `linear-gradient(90deg, ${COLORS.phiGold}, ${COLORS.quantumTeal})`,
+              border: 'none',
+              color: COLORS.cosmic,
+              padding: '12px',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              marginTop: '8px'
+            }}>
+              🎓 Start Guided Tour
+            </button>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Bottom Row */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '24px'
+      }}>
+        {/* Time Evolution */}
+        <Panel title="TIME EVOLUTION">
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={timeSeriesData}>
+              <defs>
+                <linearGradient id="latencyGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLORS.phiGold} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={COLORS.phiGold} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="time" stroke={COLORS.muteGray} fontSize={10} />
+              <YAxis stroke={COLORS.muteGray} fontSize={10} />
+              <Tooltip 
+                contentStyle={{ 
+                  background: COLORS.darkGray, 
+                  border: `1px solid ${COLORS.phiGold}`,
+                  borderRadius: '8px'
+                }}
+              />
+              <Area type="monotone" dataKey="latency" stroke={COLORS.phiGold} fillOpacity={1} fill="url(#latencyGradient)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Panel>
+
+        {/* Paradox & Reliability */}
+        <Panel title="PARADOX & RELIABILITY">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            <StatCard label="Total" value="133" color={COLORS.quantumTeal} />
+            <StatCard label="Resolved" value="129" color={COLORS.successEmerald} icon={<CheckCircle size={16} />} />
+            <StatCard label="Active" value="4" color={COLORS.warningAmber} pulse />
+          </div>
+          <div style={{ marginTop: '16px' }}>
+            <ResponsiveContainer width="100%" height={120}>
+              <BarChart data={[
+                { name: 'Convergence', value: 97 },
+                { name: 'Kaprekar', value: 100 },
+                { name: 'φ-Lock', value: 94 }
+              ]}>
+                <XAxis dataKey="name" stroke={COLORS.muteGray} fontSize={10} />
+                <YAxis stroke={COLORS.muteGray} fontSize={10} />
+                <Bar dataKey="value" fill={COLORS.quantumTeal} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+
+        {/* Global-Edu Hub */}
+        <Panel title="GLOBAL-EDU HUB">
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <EduMetric icon={<FileText size={16} />} label="LaTeX Papers" value="37" />
+            <EduMetric icon={<Code size={16} />} label="HF Spaces" value="12" trend="+3" />
+            <EduMetric icon={<Globe size={16} />} label="Social Platforms" value="9" />
+            <EduMetric icon={<Radio size={16} />} label="Live Dashboards" value="7" trend="all green" />
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
+};
+
+// Component Library
+const KPICard = ({ icon, label, value, trend, color }) => (
+  <div style={{
+    background: COLORS.darkGray,
+    border: `2px solid ${color}`,
+    borderRadius: '12px',
+    padding: '16px',
+    position: 'relative',
+    overflow: 'hidden'
+  }}>
+    <div style={{ 
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: '60px',
+      height: '60px',
+      background: `radial-gradient(circle, ${color}22, transparent)`,
+      borderRadius: '50%'
+    }} />
+    <div style={{ color, marginBottom: '8px' }}>{icon}</div>
+    <div style={{ fontSize: '11px', color: COLORS.muteGray, marginBottom: '4px' }}>{label}</div>
+    <div style={{ fontSize: '24px', fontWeight: 'bold', color }}>{value}</div>
+    <div style={{ fontSize: '10px', color: COLORS.muteGray, marginTop: '4px' }}>{trend}</div>
+  </div>
+);
+
+const Panel = ({ title, children }) => (
+  <div style={{
+    background: COLORS.darkGray,
+    border: `1px solid ${COLORS.muteGray}33`,
+    borderRadius: '12px',
+    padding: '20px'
+  }}>
+    <h3 style={{
+      color: COLORS.phiGold,
+      fontSize: '14px',
+      fontWeight: 'bold',
+      marginBottom: '16px',
+      letterSpacing: '1px'
+    }}>{title}</h3>
+    {children}
+  </div>
+);
+
+const TierCard = ({ tier, selected, onClick }) => (
+  <div
+    onClick={onClick}
+    style={{
+      background: selected ? `${tier.color}22` : COLORS.cosmic,
+      border: `2px solid ${tier.color}`,
+      borderRadius: '8px',
+      padding: '12px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      transform: selected ? 'scale(1.02)' : 'scale(1)'
+    }}
+  >
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div>
+        <div style={{ fontSize: '12px', color: COLORS.muteGray }}>Tier {tier.id}: {tier.name}</div>
+        <div style={{ fontSize: '18px', fontWeight: 'bold', color: tier.color }}>{tier.nodes} nodes</div>
+      </div>
+      <div style={{
+        width: '12px',
+        height: '12px',
+        borderRadius: '50%',
+        background: tier.color,
+        boxShadow: `0 0 12px ${tier.color}`
+      }} />
+    </div>
+    <div style={{ marginTop: '8px', fontSize: '11px', color: COLORS.muteGray }}>
+      Health: {tier.health}%
+    </div>
+  </div>
+);
+
+const HypergraphViz = ({ nodes, onNodeHover, hoveredNode }) => (
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(6, 1fr)',
+    gap: '16px',
+    padding: '20px'
+  }}>
+    {nodes.map(node => (
+      <div
+        key={node.id}
+        onMouseEnter={() => onNodeHover(node.id)}
+        onMouseLeave={() => onNodeHover(null)}
+        style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          background: node.active 
+            ? `radial-gradient(circle, ${COLORS.phiGold}, ${COLORS.quantumTeal})`
+            : COLORS.muteGray,
+          border: hoveredNode === node.id ? `3px solid ${COLORS.white}` : 'none',
+          boxShadow: node.active ? `0 0 20px ${COLORS.phiGold}` : 'none',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          transform: hoveredNode === node.id ? 'scale(1.3)' : 'scale(1)',
+          animation: node.active ? 'pulse 2s infinite' : 'none'
+        }}
+      />
+    ))}
+    <style>{`
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+    `}</style>
+  </div>
+);
+
+const NodeTooltip = ({ node }) => (
+  <div style={{
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: COLORS.cosmic,
+    border: `2px solid ${COLORS.phiGold}`,
+    borderRadius: '8px',
+    padding: '12px',
+    fontSize: '12px',
+    pointerEvents: 'none',
+    zIndex: 1000
+  }}>
+    <div style={{ color: COLORS.phiGold, fontWeight: 'bold' }}>Node #{node.id}</div>
+    <div style={{ color: COLORS.muteGray }}>Tier: {node.tier}</div>
+    <div style={{ color: COLORS.white }}>Latency: {node.latency.toFixed(1)}ms</div>
+    <div style={{ color: COLORS.white }}>φ-coherence: {node.phi.toFixed(1)}%</div>
+  </div>
+);
+
+const FilterButton = ({ children, active, color = COLORS.quantumTeal, onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      background: active ? `${color}22` : COLORS.cosmic,
+      border: `1px solid ${active ? color : COLORS.muteGray}`,
+      color: active ? color : COLORS.white,
+      padding: '10px',
+      borderRadius: '6px',
+      fontSize: '13px',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      textAlign: 'left'
+    }}
+  >
+    {children}
+  </button>
+);
+
+const StatCard = ({ label, value, color, icon, pulse }) => (
+  <div style={{
+    background: COLORS.cosmic,
+    border: `1px solid ${color}`,
+    borderRadius: '8px',
+    padding: '12px',
+    textAlign: 'center',
+    animation: pulse ? 'pulse 1.5s infinite' : 'none'
+  }}>
+    {icon && <div style={{ color, marginBottom: '4px' }}>{icon}</div>}
+    <div style={{ fontSize: '20px', fontWeight: 'bold', color }}>{value}</div>
+    <div style={{ fontSize: '10px', color: COLORS.muteGray }}>{label}</div>
+  </div>
+);
+
+const EduMetric = ({ icon, label, value, trend }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '8px',
+    background: COLORS.cosmic,
+    borderRadius: '6px',
+    border: `1px solid ${COLORS.muteGray}33`
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ color: COLORS.quantumTeal }}>{icon}</div>
+      <div style={{ fontSize: '12px' }}>{label}</div>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div style={{ fontSize: '16px', fontWeight: 'bold', color: COLORS.phiGold }}>{value}</div>
+      {trend && <div style={{ fontSize: '10px', color: COLORS.successEmerald }}>({trend})</div>}
+    </div>
+  </div>
+);
+
+export default AQARIONZDashboard;
