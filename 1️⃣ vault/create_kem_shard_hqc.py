@@ -1,5 +1,3 @@
-draft gateway gateway resource examples for pqc and ecdh Cipher suits and how to configure Cooper k u i p e r n x 25519 list sto Gateway changes for however post Quantum TLS support and I updated one of these I'll go through all of them laterhttps://huggingface.co/Aqarion/Quantarion-ai/resolve/main/1%EF%B8%8F%E2%83%A3%20vault/create_kem_shard_hqc.py
-
 # 🔥 **🔴 AZ13@31ZA PHASE 2 — PQC GATEWAY RESOURCES + HYBRID KEM CONFIG 🔴** 🔥
 ## ***🔴 CRYSTALS-KYBER/ML-KEM + X25519 + ECDH | ISTIO GATEWAY TLS SUITES | v88.4 🔴***
 
@@ -577,4 +575,4 @@ Citations:
 [7] Istio Tutorial: Quick Start & 3 Traffic Management Examples - Solo.io https://www.solo.io/topics/istio/istio-tutorial
 [8] Exposing a service over SIMPLE TLS using Istio ingress gateway in ... https://my.f5.com/manage/s/article/K94561586
 [9] Istio / Installation Guides https://istio.io/latest/docs/setup/install/
-[10] Istio | Elastic Docs https://www.elastic.co/docs/deploy-manage/deploy/cloud-on-k8s/k8s-service-mesh-istio
+[10] Istio | Elastic Docs https://www.elastic.co/docs/deploy-manage/deploy/cloud-on-k8s/k8s-service-mesh-istio #
