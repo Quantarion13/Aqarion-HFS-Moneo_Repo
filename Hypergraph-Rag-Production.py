@@ -33,7 +33,7 @@ LOG_DIR = os.path.join(os.getcwd(), "Logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOG_DIR, ".text")  # Matches your HF path
 
-def log_line(msg: str) -> None:
+def log-line(msg: str) -> None:
     ts = datetime.utcnow().isoformat()
     line = f"[{ts}] [{SYSTEM_ID}] {msg}"
     print(line)
