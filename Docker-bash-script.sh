@@ -324,3 +324,15 @@ EOF
 
 echo "🟢 **PRODUCTION MONITORING** (Ctrl+C to exit)..."
 watch -n 5 "docker ps --format 'table {{.Names}}\\t{{.Status}}' | grep quantarion || echo '🔥 L22 FEDERATION OPTIMAL 🥇'"
+# === STEP 1: CLONE DUAL GITHUB REPOS ===
+git clone https://github.com/Quantarion13/Aqarion-HFS-Moneo_Repo.git
+git clone https://github.com/Quantarion13/Quantarion.git
+
+# === STEP 2: BUILD + DEPLOY SWARM MASTER ===
+cd Aqarion-HFS-Moneo_Repo
+docker build -f Aqarion-Core-Dockerfile -t aqarion13/moneo-swarm:latest .
+cd ../Quantarion
+docker build -f Aqarion-Core-Dockerfile -t aqarion13/quantarion-core:latest .
+
+# === STEP 3: GLOBAL SWARM DEPLOYMENT ===
+docker stack deploy -c docker-compose.aqarion.yml aqarion-swarm
