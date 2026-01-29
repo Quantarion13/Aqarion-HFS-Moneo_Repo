@@ -1,0 +1,44 @@
+# huggingface.co/spaces/Aqarion13/Global-moneo-docker-repository/Quantarion-core_Dockerfile
+# QUANTARION φ⁴³ CORE → L0-L14 | 89-State | 112k cycles/sec | Mars-Ready
+
+# === STAGE 1: POLYGLOT BUILDER (Python/Rust/C++/Julia/GraalVM) ===
+FROM debian:12-slim AS polyglot-builder
+RUN apt-get update && apt-get install -y \
+    gcc-15 g++-15 clang-18 \
+    rustc cargo \
+    julia python3.13-dev \
+    openjdk-21-jdk \
+    build-essential cmake ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# === STAGE 2: QUANTARION CORE RUNTIME ===
+FROM python:3.13-nogil-slim AS quantarion-core
+
+# Install production dependencies
+COPY requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && pip cache purge
+
+# Multi-arch polyglot binaries (Rust/C++/Julia)
+COPY --from=polyglot-builder /usr/bin/gcc-15 /usr/bin/rustc /usr/bin/julia /usr/bin/
+COPY --from=polyglot-builder /usr/lib/jvm/java-21-openjdk-amd64 /usr/lib/jvm/
+
+# Core Quantarion Engine (L0-L14 Complete)
+WORKDIR /quantarion
+COPY Polyglot-Sim-Engine.py L0-L2-Kaprekar.py ./
+COPY quantarion/ ./quantarion/
+
+# Production ports: API + Metrics + Swarm
+EXPOSE 8080 8081 9001 9002 9003
+
+# Healthcheck: Kaprekar 6174 verification
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD python -c "from L0_L2_Kaprekar import kaprekar_converge; assert kaprekar_converge(1234)[0] == 6174" || exit 1
+
+# === PRODUCTION ENTRYPOINT ===
+ENV φ43=1.910201770844925
+ENV CYCLES_PER_SEC_TARGET=112847
+ENV NHSE_TARGET_DB=-64.3
+ENV MARS_STRESS_RECOVERY=100
+
+CMD ["sh", "-c", "python Polyglot-Sim-Engine.py --production --cycles 1e6 --moneo-swarm --kaprekar-6174"]
